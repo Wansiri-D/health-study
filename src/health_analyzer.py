@@ -59,7 +59,6 @@ def permutation_test(group_a, group_b, n_perm=10000):
         diff = shuffled[:n_a].mean() - shuffled[n_a:].mean()
         if diff >= observed:
             count += 1
-
     return count / n_perm
 
 
@@ -73,8 +72,33 @@ def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
         # If t is above 1.645, the test found the difference (one-sided, alpha = 0.05)
         if t_statistic(fake_a, fake_b) > 1.645:
             rejections += 1
-
     return rejections / n_sim
+
+
+def design_matrix(X):
+    """Add a column of ones to X, so the model gets an intercept."""
+    return np.column_stack([np.ones(len(X))])
+
+
+def linear_regression(X, y):
+    """Fit y = b0 + b1*x1 + ... with least squares.
+    Returns the coefficients [b0, b1, ...], where b0 is the intercept."""
+    X_design = design_matrix(X)
+    # lstsq finds the coefficients that make the squared errors as small as possible
+    coef = np.linalg.lstsq(X_design, y, rcond=None)[0]
+    return coef
+
+
+def predict(X, coef):
+    """Return predicted values for X with the given coefficients."""
+    return design_matrix(X) @ coef
+
+
+def r_squared(y, y_pred):
+    """Share of the variation in y that the model explains (0 to 1)."""
+    ss_res = np.sum((y - y_pred) ** 2)
+    ss_tot = np.sum((y - np.mean(y)) ** 2)
+    return 1 - ss_res / ss_tot
 
 
 class HealthAnalyzer:
@@ -111,3 +135,12 @@ class HealthAnalyzer:
         ax.set_ylabel("Number of people")
         ax.legend()
         return ax
+
+    def regression(self, target, features):
+        """Linear regression of target on one or more features.
+        Returns (coefficients, r2). coefficients[0] is the intercept."""
+        X = self.df[features].to_numpy()
+        y = self.df[target].to_numpy()
+        coef = linear_regression(X, y)
+        r2 = r_squared(y, predict(X, coef))
+        return coef, r2
