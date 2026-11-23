@@ -32,3 +32,40 @@ def bootstrap_ci(values, n_boot=10000, level=95):
     cut = (100 - level) / 2
     low, high = np.percentile(boot_means, [cut, 100 - cut])
     return low, high
+
+def t_statistic(group_a, group_b):
+    """Welch t-statistic for the difference in means (group_a - group_b)."""
+    diff = np.mean(group_a) - np.mean(group_b)
+    # ddof=1 divides by n-1, so pandas and numpy give the same result
+    se = np.sqrt(np.var(group_a, ddof=1) / len(group_a) +
+                 np.var(group_b, ddof=1) / len(group_b))
+    return diff / se
+
+def permutation_test(group_a, group_b, n_perm=10000):
+    """One-sided permutation test. Returns the p-value for mean(a) > mean(b)."""
+    observed = np.mean(group_a) - np.mean(group_b)
+    all_values = np.concatenate([group_a, group_b])
+    n_a = len(group_a)
+
+    count = 0
+    for _ in range(n_perm):
+        # Shuffle all values and split into two new groups with the same sizes
+        shuffled = np.random.permutation(all_values)
+        diff = shuffled[:n_a].mean() - shuffled[n_a:].mean()
+        if diff >= observed:
+            count += 1
+
+    return count / n_perm
+
+def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
+    """Returns how often the t-test finds a difference when the true difference is true_diff."""
+    rejections = 0
+    for _ in range(n_sim):
+        # Fake data: group a is true_diff higher than group b
+        fake_a = np.random.normal(loc=true_diff, scale=sd, size=n_a)
+        fake_b = np.random.normal(loc=0, scale=sd, size=n_b)
+        # If t is above 1.645, the test found the difference (one-sided, alpha = 0.05)
+        if t_statistic(fake_a, fake_b) > 1.645:
+            rejections += 1
+
+    return rejections / n_sim
