@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def load_data(path):
     """Read the health study CSV file and return a DataFrame."""
@@ -69,3 +70,39 @@ def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
             rejections += 1
 
     return rejections / n_sim
+
+class HealthAnalyzer:
+    """Runs statistics and graphs on the health study data.
+    The data is stored in the object, so I do not need to send it
+    to every function again."""
+
+    def __init__(self, df):
+        """Save the DataFrame in the object."""
+        self.df = df
+
+    def describe(self, columns):
+        """Return mean, median, min and max for the given columns."""
+        return summary_stats(self.df, columns)
+
+    def confidence_interval(self, column, method='normal'):
+        """95% confidence interval for the mean of a column.
+        method can be "normal" or "bootstrap"."""
+        values = self.df[column]
+        if method == "normal":
+            return normal_ci(values)
+        elif method == "bootstrap":
+            return bootstrap_ci(values)
+        else:
+            raise ValueError("method must be 'normal' or 'bootstrap'")
+
+    def plot_histogram(self, column, bins=30):
+        """Draw a histogram of a column with a line for the mean."""
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.hist(self.df[column], bins=bins, edgecolor="black")
+        ax.axvline(self.df[column].mean(), color="red", linestyle="--", label="Mean")
+        ax.set_title(f"Distribution of {column}")
+        ax.set_xlabel(column)
+        ax.set_ylabel("Number of people")
+        ax.legend()
+
+        return ax
