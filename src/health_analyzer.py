@@ -8,9 +8,11 @@ def load_data(path):
     """Read the health study CSV file and return a DataFrame."""
     return pd.read_csv(path)
 
+
 def summary_stats(df, columns):
     """Return mean, median, min and max for the given columns."""
-    return df[columns].agg(['mean', 'median', 'min', 'max']).T
+    return df[columns].agg(["mean", "median", "min", "max"]).T
+
 
 def normal_ci(values, z=1.96):
     """Confidence interval for the mean with normal approximation.
@@ -19,10 +21,10 @@ def normal_ci(values, z=1.96):
     se = np.std(values, ddof=1) / np.sqrt(len(values))
     return mean - z * se, mean + z * se
 
+
 def bootstrap_ci(values, n_boot=10000, level=95):
     """Confidence interval for the mean with bootstrap.
-    Returns (low, high). level=95 gives a 95% interval.
-    """
+    Returns (low, high). level=95 gives a 95% interval."""
     boot_means = []
     for _ in range(n_boot):
         # Sample with replacement, same size as the data
@@ -34,6 +36,7 @@ def bootstrap_ci(values, n_boot=10000, level=95):
     low, high = np.percentile(boot_means, [cut, 100 - cut])
     return low, high
 
+
 def t_statistic(group_a, group_b):
     """Welch t-statistic for the difference in means (group_a - group_b)."""
     diff = np.mean(group_a) - np.mean(group_b)
@@ -41,6 +44,7 @@ def t_statistic(group_a, group_b):
     se = np.sqrt(np.var(group_a, ddof=1) / len(group_a) +
                  np.var(group_b, ddof=1) / len(group_b))
     return diff / se
+
 
 def permutation_test(group_a, group_b, n_perm=10000):
     """One-sided permutation test. Returns the p-value for mean(a) > mean(b)."""
@@ -58,6 +62,7 @@ def permutation_test(group_a, group_b, n_perm=10000):
 
     return count / n_perm
 
+
 def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
     """Returns how often the t-test finds a difference when the true difference is true_diff."""
     rejections = 0
@@ -70,6 +75,7 @@ def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
             rejections += 1
 
     return rejections / n_sim
+
 
 class HealthAnalyzer:
     """Runs statistics and graphs on the health study data.
@@ -104,5 +110,4 @@ class HealthAnalyzer:
         ax.set_xlabel(column)
         ax.set_ylabel("Number of people")
         ax.legend()
-
         return ax
