@@ -144,3 +144,23 @@ class HealthAnalyzer:
         coef = linear_regression(X, y)
         r2 = r_squared(y, predict(X, coef))
         return coef, r2
+
+    def disease_rate_by(self, group_col):
+        """Share of people with the disease (in %) for each group."""
+        return self.df.groupby(group_col, observed=True)["disease"].mean() * 100
+
+    def plot_boxplot(self, column, by):
+        """Draw one box of a column for each group in another column."""
+        names = []
+        data = []
+        for name, group in self.df.groupby(by, observed=True):
+            names.append(str(name))
+            data.append(group[column])
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.boxplot(data)
+        ax.set_xticklabels(names)
+        ax.set_title(f"{column} by {by}")
+        ax.set_xlabel(by)
+        ax.set_ylabel(column)
+        return ax
