@@ -77,7 +77,7 @@ def simulate_power(true_diff, n_a, n_b, sd, n_sim=1000):
 
 def design_matrix(X):
     """Add a column of ones to X, so the model gets an intercept."""
-    return np.column_stack([np.ones(len(X))])
+    return np.column_stack([np.ones(len(X)), X])
 
 
 def linear_regression(X, y):
