@@ -16,7 +16,9 @@ def summary_stats(df, columns):
 
 def normal_ci(values, z=1.96):
     """Confidence interval for the mean with normal approximation.
-    Returns (low, high). z=1.96 gives a 95% interval."""
+
+    Returns (low, high). z=1.96 gives a 95% interval.
+    """
     mean = np.mean(values)
     se = np.std(values, ddof=1) / np.sqrt(len(values))
     return mean - z * se, mean + z * se
@@ -114,7 +116,7 @@ class HealthAnalyzer:
         """Return mean, median, min and max for the given columns."""
         return summary_stats(self.df, columns)
 
-    def confidence_interval(self, column, method='normal'):
+    def confidence_interval(self, column, method="normal"):
         """95% confidence interval for the mean of a column.
         method can be "normal" or "bootstrap"."""
         values = self.df[column]
