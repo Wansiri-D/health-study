@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def load_data(path):
     """Read the health study CSV file and return a DataFrame."""
     return pd.read_csv(path)
@@ -26,7 +27,9 @@ def normal_ci(values, z=1.96):
 
 def bootstrap_ci(values, n_boot=10000, level=95):
     """Confidence interval for the mean with bootstrap.
-    Returns (low, high). level=95 gives a 95% interval."""
+
+    Returns (low, high). level=95 gives a 95% interval.
+    """
     boot_means = []
     for _ in range(n_boot):
         # Sample with replacement, same size as the data
@@ -84,7 +87,9 @@ def design_matrix(X):
 
 def linear_regression(X, y):
     """Fit y = b0 + b1*x1 + ... with least squares.
-    Returns the coefficients [b0, b1, ...], where b0 is the intercept."""
+
+    Returns the coefficients [b0, b1, ...], where b0 is the intercept.
+    """
     X_design = design_matrix(X)
     # lstsq finds the coefficients that make the squared errors as small as possible
     coef = np.linalg.lstsq(X_design, y, rcond=None)[0]
@@ -105,8 +110,10 @@ def r_squared(y, y_pred):
 
 class HealthAnalyzer:
     """Runs statistics and graphs on the health study data.
+
     The data is stored in the object, so I do not need to send it
-    to every function again."""
+    to every function again.
+    """
 
     def __init__(self, df):
         """Save the DataFrame in the object."""
@@ -118,7 +125,9 @@ class HealthAnalyzer:
 
     def confidence_interval(self, column, method="normal"):
         """95% confidence interval for the mean of a column.
-        method can be "normal" or "bootstrap"."""
+
+        method can be "normal" or "bootstrap".
+        """
         values = self.df[column]
         if method == "normal":
             return normal_ci(values)
@@ -140,7 +149,9 @@ class HealthAnalyzer:
 
     def regression(self, target, features):
         """Linear regression of target on one or more features.
-        Returns (coefficients, r2). coefficients[0] is the intercept."""
+
+        Returns (coefficients, r2). coefficients[0] is the intercept.
+        """
         X = self.df[features].to_numpy()
         y = self.df[target].to_numpy()
         coef = linear_regression(X, y)
